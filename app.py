@@ -5,17 +5,20 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@localhost/flasktest'
 db = SQLAlchemy(app)
 
-class Animal(db.Model):
-    Id = db.Column(db.Integer, primary_key=True)
-    Typ = db.Column(db.String(20), unique=False, nullable=False)
-    Namn = db.Column(db.String(30), unique=False, nullable=False)
-    Vikt = db.Column(db.Integer, unique=False, nullable=True)
-    Skotare_id=db.Column(db.Integer, db.ForeignKey('Skotare.Id'),    nullable=False)
 
 class Skotare(db.Model):
     Id = db.Column(db.Integer, primary_key=True)
     Namn = db.Column(db.String(30), unique=False, nullable=False)
     Animals =  db.relationship('Animal', backref='Skotare', lazy=True)
+
+
+class Animal(db.Model):
+    Id = db.Column(db.Integer, primary_key=True)
+    Typ = db.Column(db.String(20), unique=False, nullable=False)
+    Namn = db.Column(db.String(30), unique=False, nullable=False)
+    Vikt = db.Column(db.Integer, unique=False, nullable=True)
+    Skotare_Id=db.Column(db.Integer, db.ForeignKey('skotare.Id'),    nullable=False)
+
 
 
 db.create_all()
@@ -35,11 +38,21 @@ while True:
         db.session.add(s)
         db.session.commit()        
 
+    if sel == "12":
+        for s in Skotare.query.all():
+            print(f"{s.Namn}...sköter:")
+            for a in s.Animals:
+                print(f"       {a.Namn}")
+
     if sel == "1":
         a = Animal()
         a.Namn = input("Ange namn")
         a.Typ = input("Ange typ")
         a.Vikt = int(input("Ange vikt"))
+        for skot in Skotare.query.all():
+            print(f"Id:{skot.Id} {skot.Namn}")
+
+        a.Skotare_Id = int(input("Ange ID för djurets skötare:"))
         db.session.add(a)
         db.session.commit()        
     
